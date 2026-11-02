@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.*
+
+# Claude Code (instruksi lokal, tidak ikut ke repo)
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+
+# Logs & OS
+npm-debug.log*
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Luas Bangun</title>
+  <meta name="description" content="Hitung luas persegi dan luas permukaan kubus lewat microservice faasd.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="hazard" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <header class="masthead">
+      <div>
+        <h1 class="title">Luas Bangun</h1>
+        <p class="lede">Hitung luas persegi dan luas permukaan kubus. Setiap hasil dihitung oleh microservice di faasd.</p>
+      </div>
+      <p class="status" id="status" data-state="checking" role="status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-text">Memeriksa service…</span>
+      </p>
+    </header>
+
+    <p class="mock-banner" id="mock-banner" hidden>
+      Mode mock aktif. <code>FAAS_URL</code> belum diset, jadi hasil dihitung lokal oleh server untuk development, bukan oleh faasd.
+    </p>
+
+    <div class="tabs" role="tablist" aria-label="Pilih perhitungan">
+      <button class="tab" role="tab" id="tab-persegi" aria-controls="panel-persegi" aria-selected="true" tabindex="0">
+        <span>Luas Persegi</span>
+      </button>
+      <button class="tab" role="tab" id="tab-kubus" aria-controls="panel-kubus" aria-selected="false" tabindex="-1">
+        <span>Luas Permukaan Kubus</span>
+      </button>
+    </div>
+
+    <!-- Menu 1: luas persegi -->
+    <section class="stage" id="panel-persegi" role="tabpanel" aria-labelledby="tab-persegi"
+             data-endpoint="/api/persegi" data-field="sisi">
+      <form class="console" novalidate>
+        <h2 class="console-title">Luas persegi</h2>
+        <p class="console-desc">Masukkan panjang sisi. Service <strong>luas-persegi</strong> menghitung sisi × sisi.</p>
+
+        <label class="field-label" for="input-sisi">Panjang sisi (s)</label>
+        <div class="field">
+          <input id="input-sisi" name="value" type="text" inputmode="decimal" autocomplete="off"
+                 placeholder="contoh: 5" aria-describedby="error-persegi">
+          <span class="field-unit">satuan</span>
+        </div>
+        <p class="error" id="error-persegi" role="alert" hidden></p>
+
+        <button class="btn" type="submit"><span class="btn-label">Hitung luas</span></button>
+      </form>
+
+      <div class="monitor">
+        <span class="sticker">luas-persegi</span>
+        <div class="screen" data-state="idle" aria-live="polite">
+          <p class="screen-formula">L = s²</p>
+          <p class="screen-idle">Masukkan panjang sisi, lalu tekan <em>Hitung luas</em>.<span class="cursor" aria-hidden="true"></span></p>
+          <div class="screen-result">
+            <p class="screen-input">s = <span data-out="input"></span></p>
+            <p class="screen-number" data-out="result"></p>
+            <p class="screen-unit">satuan²</p>
+          </div>
+          <p class="screen-nosignal">Tidak ada sinyal dari service</p>
+          <p class="screen-source" data-out="source"></p>
+        </div>
+        <ol class="route" data-state="idle" aria-label="Jalur request">
+          <li>Browser</li>
+          <li>Express di Dokku</li>
+          <li data-faas>luas-persegi</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Menu 2: luas permukaan kubus (chain service kubus -> persegi) -->
+    <section class="stage" id="panel-kubus" role="tabpanel" aria-labelledby="tab-kubus" hidden
+             data-endpoint="/api/kubus" data-field="rusuk">
+      <form class="console" novalidate>
+        <h2 class="console-title">Luas permukaan kubus</h2>
+        <p class="console-desc">Masukkan panjang rusuk. Service <strong>luas-permukaan-kubus</strong> meminta luas satu sisi ke service <strong>luas-persegi</strong>, lalu mengalikannya dengan 6.</p>
+
+        <label class="field-label" for="input-rusuk">Panjang rusuk (s)</label>
+        <div class="field">
+          <input id="input-rusuk" name="value" type="text" inputmode="decimal" autocomplete="off"
+                 placeholder="contoh: 5" aria-describedby="error-kubus">
+          <span class="field-unit">satuan</span>
+        </div>
+        <p class="error" id="error-kubus" role="alert" hidden></p>
+
+        <button class="btn" type="submit"><span class="btn-label">Hitung luas permukaan</span></button>
+      </form>
+
+      <div class="monitor">
+        <span class="sticker">luas-permukaan-kubus</span>
+        <div class="screen" data-state="idle" aria-live="polite">
+          <p class="screen-formula">L = 6 × s²</p>
+          <p class="screen-idle">Masukkan panjang rusuk, lalu tekan <em>Hitung luas permukaan</em>.<span class="cursor" aria-hidden="true"></span></p>
+          <div class="screen-result">
+            <p class="screen-input">s = <span data-out="input"></span></p>
+            <ol class="chain" aria-label="Langkah chain service">
+              <li>
+                <span class="chain-service">luas-persegi</span>
+                <span class="chain-value">luas sisi = <span data-out="luasSisi"></span> satuan²</span>
+              </li>
+              <li>
+                <span class="chain-service">luas-permukaan-kubus</span>
+                <span class="chain-value">L = 6 × <span data-out="luasSisi"></span></span>
+              </li>
+            </ol>
+            <p class="screen-number" data-out="result"></p>
+            <p class="screen-unit">satuan²</p>
+          </div>
+          <p class="screen-nosignal">Tidak ada sinyal dari service</p>
+          <p class="screen-source" data-out="source"></p>
+        </div>
+        <ol class="route" data-state="idle" aria-label="Jalur request (chain service)">
+          <li>Browser</li>
+          <li>Express di Dokku</li>
+          <li data-faas>luas-permukaan-kubus</li>
+          <li data-faas>luas-persegi</li>
+        </ol>
+        <p class="route-note">Hasil kubus diperoleh lewat chain service: luas-permukaan-kubus memanggil luas-persegi.</p>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Lab 8 Komputasi Awan. Ahmad Nizar Sauki(2306152046) - Luqmanul Hakim(2306152191)</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

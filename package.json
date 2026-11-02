@@ -1,0 +1,16 @@
+{
+  "name": "luas-bangun",
+  "version": "1.0.0",
+  "description": "Frontend Lab 8 Microservices: memanggil service faasd luas-persegi dan luas-permukaan-kubus",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
